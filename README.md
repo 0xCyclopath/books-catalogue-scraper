@@ -2,9 +2,20 @@
 
 A reusable Python scraper that extracts a complete ecommerce catalogue into clean CSV and Excel files.
 
-![Scraper result](screenshots/portfolio-overview.png)
+![Books Catalogue Scraper portfolio overview](screenshots/portfolio-overview.png)
 
-This project uses [Books to Scrape](http://books.toscrape.com/), a public demonstration ecommerce website built for scraping practice. It processes catalogue pagination, visits product-detail pages, validates the extracted rows, removes duplicate products, and exports buyer-friendly deliverables.
+This project uses [Books to Scrape](https://books.toscrape.com/), a public demonstration ecommerce website built for scraping practice. It processes catalogue pagination, visits product-detail pages, validates the extracted rows, removes duplicate products, and exports buyer-friendly deliverables.
+
+## Business Use Cases
+
+The same scraping pattern can be adapted for:
+
+- Competitor product catalogues
+- Price and stock monitoring
+- Marketplace listings
+- Public directories
+- Research datasets
+- Recurring catalogue-change detection
 
 ## Extracted Fields
 
@@ -38,14 +49,19 @@ Latest full run:
 ```text
 Pages processed: 50
 Records extracted: 1000
+Records complete: 1000
+Records partial: 0
 Duplicate records: 0
-Failed pages: 0
+Catalogue pages failed: 0
+Product pages failed: 0
 Invalid records: 0
 Missing values: 0
-Execution time: 136.09s
+Execution time: 130.67s
 Output file: output/books.csv
 Excel file: output/books.xlsx
 ```
+
+![Formatted Excel output](screenshots/excel-output.png)
 
 Generated files:
 

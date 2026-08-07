@@ -18,7 +18,7 @@ from export import FIELDNAMES, write_rows_to_csv, write_rows_to_excel
 from validation import validate_book_row
 
 
-START_URL = "http://books.toscrape.com/catalogue/page-1.html"
+START_URL = "https://books.toscrape.com/catalogue/page-1.html"
 OUTPUT_CSV_FILE = Path("output/books.csv")
 OUTPUT_EXCEL_FILE = Path("output/books.xlsx")
 REQUEST_TIMEOUT = 15
@@ -225,8 +225,11 @@ def scrape_catalogue(
         "pages_processed": 0,
         "records_extracted": 0,
         "duplicate_records": 0,
-        "failed_pages": 0,
+        "catalogue_pages_failed": 0,
+        "product_pages_failed": 0,
         "invalid_records": 0,
+        "records_complete": 0,
+        "records_partial": 0,
     }
 
     logger.info("Starting scrape")
@@ -239,7 +242,7 @@ def scrape_catalogue(
         try:
             html = fetch_page(session, page_url, request_settings)
         except requests.RequestException as exc:
-            metrics["failed_pages"] += 1
+            metrics["catalogue_pages_failed"] += 1
             logger.error("Failed to fetch catalogue page: %s (%s)", page_url, exc)
             break
 
@@ -261,17 +264,20 @@ def scrape_catalogue(
             try:
                 book = enrich_book_details(book, session, request_settings)
             except requests.RequestException as exc:
-                metrics["failed_pages"] += 1
+                metrics["product_pages_failed"] += 1
                 logger.error("Failed to fetch product page: %s (%s)", book.product_url, exc)
 
             validation_errors = validate_book(book)
             if validation_errors:
                 metrics["invalid_records"] += 1
+                metrics["records_partial"] += 1
                 logger.warning(
                     "Validation issue for %s: %s",
                     book.product_url,
                     "; ".join(validation_errors),
                 )
+            else:
+                metrics["records_complete"] += 1
 
             books.append(book)
 
@@ -292,8 +298,11 @@ def count_missing_values(rows: Iterable[dict[str, str]]) -> int:
 def print_summary(metrics: dict[str, int | float], csv_file: Path, excel_file: Path | None = None) -> None:
     print(f"Pages processed: {metrics['pages_processed']}")
     print(f"Records extracted: {metrics['records_extracted']}")
+    print(f"Records complete: {metrics['records_complete']}")
+    print(f"Records partial: {metrics['records_partial']}")
     print(f"Duplicate records: {metrics['duplicate_records']}")
-    print(f"Failed pages: {metrics['failed_pages']}")
+    print(f"Catalogue pages failed: {metrics['catalogue_pages_failed']}")
+    print(f"Product pages failed: {metrics['product_pages_failed']}")
     print(f"Invalid records: {metrics['invalid_records']}")
     print(f"Missing values: {metrics['missing_values']}")
     print(f"Execution time: {metrics['execution_time_seconds']:.2f}s")
